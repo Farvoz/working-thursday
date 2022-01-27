@@ -45,24 +45,24 @@ module.exports = {
         callback: async (ctx) => {
             const chatId = ctx.message.chat.id
 
-            // "/addRecurrent 22:00 y late night hack
+            // /addRecurrent 22:00 late night hack
             const message = ctx.message.text
           
             const {
               name,
               eventTime,
-              atWeekend,
             } = parseAddRecurrentMessage(message)
+
+            const time = new Date(eventTime + ' 1 1 1970 GMT+3')
           
             await createEvent(
               chatId,
               name,
-              eventTime,
+              time,
               true,
-              atWeekend,
             )
           
-            ctx.reply(`Создано событие ${name} на ${eventTime} ${atWeekend ? 'с выходными' : 'без выходных'}`)
+            ctx.reply(`Создано событие ${name} на ${eventTime}`)
         }
     },
     'addOne': {
