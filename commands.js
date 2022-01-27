@@ -80,8 +80,8 @@ module.exports = {
         'description': 'stopAll',
         callback: () => ({})
     },
-    'enableExtraForMe': {
-        'description': 'enableExtraForMe',
+    'subscribe': {
+        'description': 'subscribe',
         callback: (ctx) => {
             const chatId = ctx.message.chat.id
             const userId = ctx.message.from.id

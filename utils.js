@@ -1,6 +1,6 @@
 const testRecurrentString = `"/addRecurrent 22:00 y late night hack`
 
-console.log(parseAddRecurrentMessage(testRecurrentString))
+// console.log(parseAddRecurrentMessage(testRecurrentString))
 
 function parseAddRecurrentMessage(str) {
   const TEMPLATE = '/addRecurrent'

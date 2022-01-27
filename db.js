@@ -12,7 +12,7 @@ const UserCollection = db.collection('users');
 
 
 async function getChatsForUser(userId) {
-  const user = await UserCollection.find({ userId });
+  const user = await UserCollection.findOne({ userId });
   if (!user) return null;
   return user.chatIds;
 }
@@ -22,7 +22,7 @@ async function addChatForUser(userId, newChatId) {
   if (!prevChats) {
     return await UserCollection.insert({ userId , chatIds: [newChatId] })
   }
-  const chatIds = [...prevChats, newChatId]
+  const chatIds = [...new Set([...prevChats, newChatId])]
   return await UserCollection.update({ userId }, { $set: { chatIds } })
 }
 
