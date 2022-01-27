@@ -8,6 +8,9 @@ const {
   getAllRecurrentEvents,
   dropSelectedTimeCollection
 } = require('./db')
+const {
+  pushPoll
+} = require('./utils')
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
 const cronForEvents = process.env.CRON_EVENTS
@@ -16,28 +19,6 @@ const cronForQueuing = process.env.CRON_QUEUING
 bot.command('quit', (ctx) => {
   ctx.leaveChat()
 })
-
-const options = [
-  '12:00', 
-  '12:30', 
-  '13:00', 
-  '13:30', 
-  '14:00', 
-  '14:30', 
-  '15:00',
-  'Хочу посмотреть результат'
-]
-
-const pushPoll = () => {
-  try {
-    bot.telegram.sendPoll(chatId, 'Друзья, во сколько сегодня пойдем кушать?', options, {
-      is_anonymous: false
-    })
-    console.log('ОпросF отправил успешно')
-  } catch (err) {
-    console.error(err)
-  }
-}
 
 Object.keys(commands).forEach((command) => {
   bot.command(`/${command}`, (ctx) => {
@@ -49,16 +30,21 @@ bot.launch()
 console.log("Стартанули успешно!")
 
 let queue = []
+getAllRecurrentEvents().then((res) => {
+  queue = res
+})
+
 createCronJob(cronForQueuing, async () => {
   queue = (await getAllRecurrentEvents() || []).filter(({eventTime}) => ![6,7].includes(eventTime).getDay())
   dropSelectedTimeCollection()
 })
 
 createCronJob(cronForEvents, () => {
+  console.log(queue)
   queue = queue.filter((item) => {
     const { eventTime } = item
     const now = new Date()
-
+    console.log(eventTime)
     // think about corner cases (where we get cut off by GMT+3)
     const hoursEvent = eventTime.getHours()
     const minutesEvent = eventTime.getMinutes()
@@ -67,7 +53,7 @@ createCronJob(cronForEvents, () => {
     if (!(hoursEvent <= hoursNow && minutesEvent <= minutesNow)) {
       return true
     }
-    pushPoll(chatId, eventTime)
+    pushPoll(item.chatId, eventTime)
     return false
   })
 })

@@ -79,4 +79,5 @@ module.exports = {
   addChatForUser,
   getEventsForAllChats,
   dropSelectedTimeCollection,
+  getAllRecurrentEvents,
 }

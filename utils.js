@@ -1,7 +1,8 @@
 const testRecurrentString = `"/addRecurrent 22:00 y late night hack`
+const { Telegraf } =  require('telegraf')
 
 // console.log(parseAddRecurrentMessage(testRecurrentString))
-
+const bot = new Telegraf(process.env.BOT_TOKEN)
 function parseAddRecurrentMessage(str) {
   const TEMPLATE = '/addRecurrent'
   const startingIndex = str.indexOf(TEMPLATE)
@@ -23,22 +24,19 @@ function parseAddRecurrentMessage(str) {
   }
 }
 
-const pushPoll = (chatId, time) => {
-  const options = [
-    '12:00', 
-    '12:30', 
-    '13:00', 
-    '13:30', 
-    '14:00', 
-    '14:30', 
-    '15:00',
-    'Хочу посмотреть результат'
-  ]
+function generateOptionsByTime (time) {
+  return ['14:00', '14:30'] // Сюда добавить интервалы по полчаса на 4 часа
+}
+
+// Как-то получать время в опросе
+
+const pushPoll = (chatId, eventTime) => {
   try {
-    bot.telegram.sendPoll(chatId, 'Друзья, во сколько сегодня пойдем кушать?', options, {
+    eventTime
+    bot.telegram.sendPoll(chatId, 'Друзья, во сколько сегодня пойдем кушать?', generateOptionsByTime(eventTime), {
       is_anonymous: false
     })
-    console.log('Опрос отправил успешно')
+    console.log('ОпросF отправил успешно')
   } catch (err) {
     console.error(err)
   }
