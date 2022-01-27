@@ -49,17 +49,19 @@ async function getEventsForChat(chatId) {
   return events;
 }
 
-async function deleteEventsForChat(chatId, id) {
-  if (id) {
-    return await EventCollection.remove({ chatId, id })
-  }
+async function deleteChatEvent(chatId, id) {
+  return await EventCollection.remove({ chatId, id: Number(id) })
+}
+
+async function deleteAllChatEvents(chatId) {
   return await EventCollection.remove({ chatId })
 }
 
 module.exports = {
   createEvent,
   getEventsForChat,
-  deleteEventsForChat,
+  deleteChatEvent,
+  deleteAllChatEvents,
   getAllEvents,
   getChatsForUser,
   addChatForUser,

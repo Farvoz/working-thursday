@@ -2,7 +2,8 @@ const { Telegraf } =  require('telegraf')
 const {
   createEvent,
   getEventsForChat,
-  deleteEventsForChat,
+  deleteChatEvent,
+  deleteAllChatEvents,
   getAllEvents,
   getChatsForUser,
   addChatForUser,
