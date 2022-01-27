@@ -15,7 +15,7 @@ async function getAllEvents() {
 }
 
 async function createEvent(chatId, name, eventTime, recurrent, atWeekend) {
-  const randomId = Math.random() * MAX_INT;
+  const randomId = Math.random() * MAX_INT | 0;
 
   const newEvent = {
     chatId,

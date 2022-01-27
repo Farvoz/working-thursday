@@ -1,4 +1,13 @@
 const { Telegraf } =  require('telegraf')
+const {
+  createEvent,
+  getEventsForChat,
+  deleteEventsForChat,
+  getAllEvents,
+} = require('./db')
+const {
+  parseAddRecurrentMessage,
+} = require('./utils')
 require('dotenv').config()
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
@@ -36,10 +45,33 @@ bot.command('id', (ctx) => {
   ctx.telegram.sendMessage(ctx.message.chat.id, `Your id: ${ctx.message.chat.id}`)
 })
 
+bot.command('addRecurrent', (ctx) => {
+  const chatId = ctx.message.chat.id
+
+  // "/addRecurrent 22:00 y late night hack
+  const message = ctx.message.text
+
+  const {
+    name,
+    eventTime,
+    atWeekend,
+  } = parseAddRecurrentMessage(message)
+
+  createEvent(
+    chatId,
+    name,
+    eventTime,
+    true,
+    atWeekend,
+  )
+
+  ctx.reply(`Создано событие ${name} на ${eventTime} ${atWeekend ? 'с выходными' : 'без выходных'}`)
+})
+
 bot.launch()
 console.log("Стартанули успешно!")
 
-require('./job')(cronTemplate, pushPoll)
+//require('./job')(cronTemplate, pushPoll)
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'))
