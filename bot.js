@@ -17,6 +17,8 @@ const bot = new Telegraf(process.env.BOT_TOKEN)
 const chatId = process.env.CHAT_ID
 const cronTemplate = process.env.CRON
 
+const DATA_ERROR = 'Ошибка данных. Попробуйте позже';
+const COMMON_EXEPTION_MESSAGE = 'Что-то не так. Попробуйте /help';
 
 bot.command('quit', (ctx) => {
   ctx.leaveChat()
@@ -47,6 +49,60 @@ const pushPoll = () => {
 bot.command('id', (ctx) => {
   ctx.telegram.sendMessage(ctx.message.chat.id, `Your id: ${ctx.message.chat.id}`)
 })
+
+bot.command('show_events', (ctx) => {
+  getEventsForChat(ctx.message.chat.id).then((data) => {
+    return data.map(({
+      id,
+      name,
+      eventTime,
+    }) => `${id} — [${eventTime}]: ${name}`);
+  }).then((eventList) => {
+    if (eventList.length) {
+      ctx.telegram.sendMessage(ctx.message.chat.id, eventList.join('\n'))
+    } else {
+      ctx.telegram.sendMessage(ctx.message.chat.id, 'Пока нет ни одного события')
+    }
+  }).catch((err) => {
+    ctx.telegram.sendMessage(ctx.message.chat.id, DATA_ERROR)
+  });
+});
+
+
+bot.command('stopAll', (ctx) => {
+  try {
+    deleteAllChatEvents(ctx.message.chat.id).then((data) => {
+      if (data && !data.deletedCount) {
+        throw '(';
+      }
+
+      ctx.telegram.sendMessage(ctx.message.chat.id, 'Успех 👍')
+    }).catch((err) => {
+      ctx.telegram.sendMessage(ctx.message.chat.id, 'Не получилось 🥲');
+    });
+  } catch (err) {
+    ctx.telegram.sendMessage(ctx.message.chat.id, COMMON_EXEPTION_MESSAGE);
+  }
+});
+
+bot.command('stop', (ctx) => {
+  const idToStopPattern = /\/stop (\S*)/;
+
+  try {
+    const idToStop = ctx.message.text.match(idToStopPattern)[1];
+    deleteChatEvent(ctx.message.chat.id, idToStop).then((data) => {
+      if (data && !data.deletedCount) {
+        throw '(';
+      }
+
+      ctx.telegram.sendMessage(ctx.message.chat.id, 'Успех 👍')
+    }).catch((err) => {
+      ctx.telegram.sendMessage(ctx.message.chat.id, 'Не получилось 🥲');
+    });
+  } catch (err) {
+    ctx.telegram.sendMessage(ctx.message.chat.id, COMMON_EXEPTION_MESSAGE);
+  }
+});
 
 bot.command('addRecurrent', (ctx) => {
   const chatId = ctx.message.chat.id
