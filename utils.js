@@ -42,8 +42,21 @@ const pushPoll = (chatId, eventTime) => {
   }
 }
 
+function formatDate(rawDate) {
+  const date = new Date(rawDate);
+  
+  try {
+    const formatedDate = `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+
+    return formatedDate;
+  } catch (err) {
+    return '';
+  }
+}
+
 
 module.exports = {
   parseAddRecurrentMessage,
   pushPoll,
+  formatDate,
 }

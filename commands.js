@@ -1,15 +1,20 @@
 const {
     parseAddRecurrentMessage,
+    formatDate,
   } = require('./utils')
 const {
   createEvent,
   getEventsForChat,
-  deleteEventsForChat,
+  deleteChatEvent,
+  deleteAllChatEvents,
   getAllEvents,
   getChatsForUser,
   addChatForUser,
   getEventsForAllChats,
 } = require('./db')
+
+const DATA_ERROR = 'Ошибка данных. Попробуйте позже';
+const COMMON_EXEPTION_MESSAGE = 'Что-то не так. Попробуйте /help';
 
 module.exports = {
     'id': {
@@ -73,13 +78,64 @@ module.exports = {
         'description': 'stopList',
         callback: async () => ({})
     },
+    'showEvents': {
+        'description': 'Получить список ивентов',
+        callback: async (ctx) => {
+            getEventsForChat(ctx.message.chat.id).then((data) => {
+                return data.map(({
+                id,
+                name,
+                eventTime,
+                }) => `${id} — [${formatDate(eventTime)}]: ${name}`);
+            }).then((eventList) => {
+                if (eventList.length) {
+                ctx.telegram.sendMessage(ctx.message.chat.id, eventList.join('\n'))
+                } else {
+                ctx.telegram.sendMessage(ctx.message.chat.id, 'Пока нет ни одного события')
+                }
+            }).catch((err) => {
+                ctx.telegram.sendMessage(ctx.message.chat.id, DATA_ERROR)
+            });
+        }
+    },
     'stop': {
         'description': 'stop',
-        callback: async () => ({})
+        callback: async (ctx) => {
+            const idToStopPattern = /\/stop (\S*)/;
+
+            try {
+                const idToStop = ctx.message.text.match(idToStopPattern)[1];
+                deleteChatEvent(ctx.message.chat.id, idToStop).then((data) => {
+                if (data && !data.deletedCount) {
+                    throw '(';
+                }
+
+                ctx.telegram.sendMessage(ctx.message.chat.id, 'Успех 👍')
+                }).catch((err) => {
+                ctx.telegram.sendMessage(ctx.message.chat.id, 'Не получилось 🥲');
+                });
+            } catch (err) {
+                ctx.telegram.sendMessage(ctx.message.chat.id, COMMON_EXEPTION_MESSAGE);
+            }
+        }
     },
     'stopAll': {
         'description': 'stopAll',
-        callback: async () => ({})
+        callback: async (ctx) => {
+            try {
+                deleteAllChatEvents(ctx.message.chat.id).then((data) => {
+                if (data && !data.deletedCount) {
+                    throw '(';
+                }
+
+                ctx.telegram.sendMessage(ctx.message.chat.id, 'Успех 👍')
+                }).catch((err) => {
+                ctx.telegram.sendMessage(ctx.message.chat.id, 'Не получилось 🥲');
+                });
+            } catch (err) {
+                ctx.telegram.sendMessage(ctx.message.chat.id, COMMON_EXEPTION_MESSAGE);
+            }
+        }
     },
     'subscribe': {
         'description': 'subscribe',
