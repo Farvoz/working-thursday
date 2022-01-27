@@ -15,16 +15,11 @@ function parseAddRecurrentMessage(str) {
   const eventTime = time[0]
 
   const timeIndex = withoutCommand.indexOf(eventTime)
-  const withoutTime = withoutCommand.substring(timeIndex + eventTime.length).trim()
-
-  const atWeekend = withoutTime[0] === 'y'
-
-  const name = withoutTime.substring(2)
+  const name = withoutCommand.substring(timeIndex + eventTime.length).trim()
 
   return {
     name,
     eventTime,
-    atWeekend,
   }
 }
 

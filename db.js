@@ -30,7 +30,7 @@ async function getAllEvents() {
   return await EventCollection.find({});
 }
 
-async function createEvent(chatId, name, eventTime, recurrent, atWeekend) {
+async function createEvent(chatId, name, eventTime, recurrent) {
   const randomId = Math.random() * MAX_INT | 0;
 
   const newEvent = {

@@ -1,22 +1,7 @@
 const { Telegraf } =  require('telegraf')
-const {
-  createEvent,
-  getEventsForChat,
-  deleteEventsForChat,
-  getAllEvents,
-  getChatsForUser,
-  addChatForUser,
-} = require('./db')
-const {
-  parseAddRecurrentMessage,
-  pushPoll,
-} = require('./utils')
-const {
-  formQueue,
-  queue,
-} = require('./queue')
-const createCronJob = require('./job')
 require('dotenv').config()
+
+const commands = require('./commands')
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
 const cronForEvents = process.env.CRON_EVENTS
@@ -27,38 +12,32 @@ bot.command('quit', (ctx) => {
   ctx.leaveChat()
 })
 
-bot.command('id', (ctx) => {
-  ctx.telegram.sendMessage(ctx.message.chat.id, `Your id: ${ctx.message.chat.id}`)
-})
+const options = [
+  '12:00', 
+  '12:30', 
+  '13:00', 
+  '13:30', 
+  '14:00', 
+  '14:30', 
+  '15:00',
+  'Хочу посмотреть результат'
+]
 
-bot.command('addRecurrent', (ctx) => {
-  const chatId = ctx.message.chat.id
+const pushPoll = () => {
+  try {
+    bot.telegram.sendPoll(chatId, 'Друзья, во сколько сегодня пойдем кушать?', options, {
+      is_anonymous: false
+    })
+    console.log('Опрос отправил успешно')
+  } catch (err) {
+    console.error(err)
+  }
+}
 
-  // "/addRecurrent 22:00 y late night hack
-  const message = ctx.message.text
-
-  const {
-    name,
-    eventTime,
-    atWeekend,
-  } = parseAddRecurrentMessage(message)
-
-  createEvent(
-    chatId,
-    name,
-    eventTime,
-    true,
-    atWeekend,
-  )
-
-  ctx.reply(`Создано событие ${name} на ${eventTime} ${atWeekend ? 'с выходными' : 'без выходных'}`)
-})
-
-bot.command('subscribe', (ctx) => {
-  const chatId = ctx.message.chat.id
-  const userId = ctx.message.from.id
-
-  addChatForUser(userId, chatId)
+Object.keys(commands).forEach((command) => {
+  bot.command(`/${command}`, (ctx) => {
+    commands[command].callback.apply(undefined, [ctx, commands[command]])
+  })
 })
 
 bot.launch()
