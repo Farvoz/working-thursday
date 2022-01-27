@@ -1,17 +1,33 @@
-const monk = require('monk');
-require('dotenv').config()
 const MAX_INT = 3e6;
 
+const monk = require('monk');
+require('dotenv').config()
+
 const password = process.env.MONGO_PASS;
-
 const uri = `mongodb+srv://bot_user:${password}@cluster0.3rhwd.mongodb.net/Bot?retryWrites=true&w=majority`;
-
 const db = monk(uri);
 
 const EventCollection = db.collection('events');
+const UserCollection = db.collection('users');
+
+
+async function getChatsForUser(userId) {
+  const user = await UserCollection.find({ userId });
+  if (!user) return null;
+  return user.chatIds;
+}
+
+async function addChatForUser(userId, newChatId) {
+  const prevChats = await getChatsForUser(userId)
+  if (!prevChats) {
+    return await UserCollection.insert({ userId , chatIds: [newChatId] })
+  }
+  const chatIds = [...prevChats, newChatId]
+  return await UserCollection.update({ userId }, { $set: { chatIds } })
+}
 
 async function getAllEvents() {
-  return EventCollection.find({});
+  return await EventCollection.find({});
 }
 
 async function createEvent(chatId, name, eventTime, recurrent, atWeekend) {
@@ -25,7 +41,7 @@ async function createEvent(chatId, name, eventTime, recurrent, atWeekend) {
     id: randomId,
   };
 
-  await EventCollection.insert(newEvent);
+  return await EventCollection.insert(newEvent);
 }
 
 async function getEventsForChat(chatId) {
@@ -40,12 +56,11 @@ async function deleteEventsForChat(chatId, id) {
   return await EventCollection.remove({ chatId })
 }
 
-
-console.log(getAllEvents())
-
 module.exports = {
   createEvent,
   getEventsForChat,
   deleteEventsForChat,
   getAllEvents,
+  getChatsForUser,
+  addChatForUser,
 }

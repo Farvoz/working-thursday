@@ -4,6 +4,8 @@ const {
   getEventsForChat,
   deleteEventsForChat,
   getAllEvents,
+  getChatsForUser,
+  addChatForUser,
 } = require('./db')
 const {
   parseAddRecurrentMessage,
@@ -66,6 +68,13 @@ bot.command('addRecurrent', (ctx) => {
   )
 
   ctx.reply(`Создано событие ${name} на ${eventTime} ${atWeekend ? 'с выходными' : 'без выходных'}`)
+})
+
+bot.command('enableExtraForMe', (ctx) => {
+  const chatId = ctx.message.chat.id
+  const userId = ctx.message.from.id
+
+  addChatForUser(userId, chatId)
 })
 
 bot.launch()
