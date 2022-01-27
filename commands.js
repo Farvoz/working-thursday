@@ -27,7 +27,7 @@ module.exports = {
             /stop - 
             /stop<id> - 
             /stopAll -
-            /enableExtraForMe - 
+            /subscribe - 
             /showAvailable - Запрос событий, доступных пользователю
         `,
         callback: async (ctx, command) => {
