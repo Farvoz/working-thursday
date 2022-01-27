@@ -9,7 +9,12 @@ const db = monk(uri);
 
 const EventCollection = db.collection('events');
 const UserCollection = db.collection('users');
+const SelectedTimeCollection = db.collection('selectedTime');
 
+
+async function dropSelectedTimeCollection() {
+  return await SelectedTimeCollection.drop()
+}
 
 async function getChatsForUser(userId) {
   const user = await UserCollection.find({ userId });
@@ -28,6 +33,10 @@ async function addChatForUser(userId, newChatId) {
 
 async function getAllEvents() {
   return await EventCollection.find({});
+}
+
+async function getAllRecurrentEvents() {
+  return await EventCollection.find({recurrent: true});
 }
 
 async function createEvent(chatId, name, eventTime, recurrent) {
@@ -69,4 +78,5 @@ module.exports = {
   getChatsForUser,
   addChatForUser,
   getEventsForAllChats,
+  dropSelectedTimeCollection,
 }
