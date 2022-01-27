@@ -1,10 +1,12 @@
 const {
     parseAddRecurrentMessage,
+    formatDate,
   } = require('./utils')
 const {
   createEvent,
   getEventsForChat,
-  deleteEventsForChat,
+  deleteChatEvent,
+  deleteAllChatEvents,
   getAllEvents,
   getChatsForUser,
   addChatForUser,
@@ -84,7 +86,7 @@ module.exports = {
                 id,
                 name,
                 eventTime,
-                }) => `${id} — [${eventTime}]: ${name}`);
+                }) => `${id} — [${formatDate(eventTime)}]: ${name}`);
             }).then((eventList) => {
                 if (eventList.length) {
                 ctx.telegram.sendMessage(ctx.message.chat.id, eventList.join('\n'))
@@ -98,7 +100,7 @@ module.exports = {
     },
     'stop': {
         'description': 'stop',
-        callback: async () => {
+        callback: async (ctx) => {
             const idToStopPattern = /\/stop (\S*)/;
 
             try {
