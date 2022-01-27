@@ -8,12 +8,13 @@ const {
   getAllEvents,
   getChatsForUser,
   addChatForUser,
+  getEventsForAllChats,
 } = require('./db')
 
 module.exports = {
     'id': {
         description: 'id',
-        callback: (ctx) => {
+        callback: async (ctx) => {
             ctx.telegram.sendMessage(ctx.message.chat.id, `Your id: ${ctx.message.chat.id}`)
         }
     },
@@ -29,19 +30,19 @@ module.exports = {
             /enableExtraForMe - 
             /showAvailable - Запрос событий, доступных пользователю
         `,
-        callback: (ctx, command) => {
+        callback: async (ctx, command) => {
             ctx.telegram.sendMessage(ctx.message.chat.id, command.description)
         }
     },
     'help': {
         'description': 'Помощь',
-        callback: () => (ctx, command) => {
+        callback: async () => (ctx, command) => {
             ctx.telegram.sendMessage(ctx.message.chat.id, command.description)
         }
     },
     'addRecurrent': {
         'description': 'addRecurrent',
-        callback: (ctx) => {
+        callback: async (ctx) => {
             const chatId = ctx.message.chat.id
 
             // "/addRecurrent 22:00 y late night hack
@@ -53,7 +54,7 @@ module.exports = {
               atWeekend,
             } = parseAddRecurrentMessage(message)
           
-            createEvent(
+            await createEvent(
               chatId,
               name,
               eventTime,
@@ -66,31 +67,44 @@ module.exports = {
     },
     'addOne': {
         'description': 'addOne',
-        callback: () => ({})
+        callback: async () => ({})
     },
     'stopList': {
         'description': 'stopList',
-        callback: () => ({})
+        callback: async () => ({})
     },
     'stop': {
         'description': 'stop',
-        callback: () => ({})
+        callback: async () => ({})
     },
     'stopAll': {
         'description': 'stopAll',
-        callback: () => ({})
+        callback: async () => ({})
     },
     'subscribe': {
         'description': 'subscribe',
-        callback: (ctx) => {
+        callback: async (ctx) => {
             const chatId = ctx.message.chat.id
             const userId = ctx.message.from.id
           
             addChatForUser(userId, chatId)
-          }
+        }
     },
     'showAvailable': {
         'description': 'showAvailable',
-        callback: () => ({})
+        callback: async (ctx) => {
+            const userId = ctx.message.from.id
+            const chats = await getChatsForUser(userId) || [];
+            const events = await getEventsForAllChats(chats)
+            if (events.length === 0) {
+                return ctx.reply(`У вас нет доступных событий`)
+            }
+            ctx.reply(`Список доступных событий:
+                ${events.reduce('', (acc, el) => {
+                    acc += (el.name + ': ' + el.time + '\n')
+                    return acc 
+                })}
+            `)
+        }
     }
 }

@@ -12,7 +12,7 @@ const UserCollection = db.collection('users');
 
 
 async function getChatsForUser(userId) {
-  const user = await UserCollection.findOne({ userId });
+  const user = await UserCollection.find({ userId });
   if (!user) return null;
   return user.chatIds;
 }
@@ -22,7 +22,7 @@ async function addChatForUser(userId, newChatId) {
   if (!prevChats) {
     return await UserCollection.insert({ userId , chatIds: [newChatId] })
   }
-  const chatIds = [...new Set([...prevChats, newChatId])]
+  const chatIds = [...prevChats, newChatId]
   return await UserCollection.update({ userId }, { $set: { chatIds } })
 }
 
@@ -49,6 +49,11 @@ async function getEventsForChat(chatId) {
   return events;
 }
 
+async function getEventsForAllChats(chatIds) {
+  const events = await EventCollection.find({ chatId: {$all: chatIds} });
+  return events;
+}
+
 async function deleteEventsForChat(chatId, id) {
   if (id) {
     return await EventCollection.remove({ chatId, id })
@@ -63,4 +68,5 @@ module.exports = {
   getAllEvents,
   getChatsForUser,
   addChatForUser,
+  getEventsForAllChats,
 }
