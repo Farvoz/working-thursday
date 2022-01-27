@@ -51,11 +51,13 @@ module.exports = {
               name,
               eventTime,
             } = parseAddRecurrentMessage(message)
+
+            const time = new Date(eventTime + ' 1 1 1970 GMT+3')
           
             createEvent(
               chatId,
               name,
-              eventTime,
+              time,
               true,
             )
           
