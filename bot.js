@@ -4,6 +4,11 @@ require('dotenv').config()
 const commands = require('./commands')
 const createCronJob = require('./job')
 
+const {
+  getAllRecurrentEvents,
+  dropSelectedTimeCollection
+} = require('./db')
+
 const bot = new Telegraf(process.env.BOT_TOKEN)
 const cronForEvents = process.env.CRON_EVENTS
 const cronForQueuing = process.env.CRON_QUEUING
@@ -28,7 +33,7 @@ const pushPoll = () => {
     bot.telegram.sendPoll(chatId, 'Друзья, во сколько сегодня пойдем кушать?', options, {
       is_anonymous: false
     })
-    console.log('Опрос отправил успешно')
+    console.log('ОпросF отправил успешно')
   } catch (err) {
     console.error(err)
   }
@@ -45,7 +50,8 @@ console.log("Стартанули успешно!")
 
 let queue = []
 createCronJob(cronForQueuing, async () => {
-  queue = await getAllEvents()
+  queue = (await getAllRecurrentEvents() || []).filter(({eventTime}) => ![6,7].includes(eventTime).getDay())
+  dropSelectedTimeCollection()
 })
 
 createCronJob(cronForEvents, () => {
