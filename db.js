@@ -12,7 +12,7 @@ const UserCollection = db.collection('users');
 
 
 async function getChatsForUser(userId) {
-  const user = await UserCollection.findOne({ userId });
+  const user = await UserCollection.find({ userId });
   if (!user) return null;
   return user.chatIds;
 }
@@ -22,7 +22,7 @@ async function addChatForUser(userId, newChatId) {
   if (!prevChats) {
     return await UserCollection.insert({ userId , chatIds: [newChatId] })
   }
-  const chatIds = [...new Set([...prevChats, newChatId])]
+  const chatIds = [...prevChats, newChatId]
   return await UserCollection.update({ userId }, { $set: { chatIds } })
 }
 
@@ -30,7 +30,7 @@ async function getAllEvents() {
   return await EventCollection.find({});
 }
 
-async function createEvent(chatId, name, eventTime, recurrent, atWeekend) {
+async function createEvent(chatId, name, eventTime, recurrent) {
   const randomId = Math.random() * MAX_INT | 0;
 
   const newEvent = {
@@ -46,6 +46,11 @@ async function createEvent(chatId, name, eventTime, recurrent, atWeekend) {
 
 async function getEventsForChat(chatId) {
   const events = await EventCollection.find({ chatId });
+  return events;
+}
+
+async function getEventsForAllChats(chatIds) {
+  const events = await EventCollection.find({ chatId: {$all: chatIds} });
   return events;
 }
 
@@ -65,4 +70,5 @@ module.exports = {
   getAllEvents,
   getChatsForUser,
   addChatForUser,
+  getEventsForAllChats,
 }

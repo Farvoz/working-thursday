@@ -1,24 +1,12 @@
 const { Telegraf } =  require('telegraf')
-const {
-  createEvent,
-  getEventsForChat,
-  deleteChatEvent,
-  deleteAllChatEvents,
-  getAllEvents,
-  getChatsForUser,
-  addChatForUser,
-} = require('./db')
-const {
-  parseAddRecurrentMessage,
-} = require('./utils')
 require('dotenv').config()
 
-const bot = new Telegraf(process.env.BOT_TOKEN)
-const chatId = process.env.CHAT_ID
-const cronTemplate = process.env.CRON
+const commands = require('./commands')
+const createCronJob = require('./job')
 
-const DATA_ERROR = 'Ошибка данных. Попробуйте позже';
-const COMMON_EXEPTION_MESSAGE = 'Что-то не так. Попробуйте /help';
+const bot = new Telegraf(process.env.BOT_TOKEN)
+const cronForEvents = process.env.CRON_EVENTS
+const cronForQueuing = process.env.CRON_QUEUING
 
 bot.command('quit', (ctx) => {
   ctx.leaveChat()
@@ -46,98 +34,37 @@ const pushPoll = () => {
   }
 }
 
-bot.command('id', (ctx) => {
-  ctx.telegram.sendMessage(ctx.message.chat.id, `Your id: ${ctx.message.chat.id}`)
-})
-
-bot.command('show_events', (ctx) => {
-  getEventsForChat(ctx.message.chat.id).then((data) => {
-    return data.map(({
-      id,
-      name,
-      eventTime,
-    }) => `${id} — [${eventTime}]: ${name}`);
-  }).then((eventList) => {
-    if (eventList.length) {
-      ctx.telegram.sendMessage(ctx.message.chat.id, eventList.join('\n'))
-    } else {
-      ctx.telegram.sendMessage(ctx.message.chat.id, 'Пока нет ни одного события')
-    }
-  }).catch((err) => {
-    ctx.telegram.sendMessage(ctx.message.chat.id, DATA_ERROR)
-  });
-});
-
-
-bot.command('stopAll', (ctx) => {
-  try {
-    deleteAllChatEvents(ctx.message.chat.id).then((data) => {
-      if (data && !data.deletedCount) {
-        throw '(';
-      }
-
-      ctx.telegram.sendMessage(ctx.message.chat.id, 'Успех 👍')
-    }).catch((err) => {
-      ctx.telegram.sendMessage(ctx.message.chat.id, 'Не получилось 🥲');
-    });
-  } catch (err) {
-    ctx.telegram.sendMessage(ctx.message.chat.id, COMMON_EXEPTION_MESSAGE);
-  }
-});
-
-bot.command('stop', (ctx) => {
-  const idToStopPattern = /\/stop (\S*)/;
-
-  try {
-    const idToStop = ctx.message.text.match(idToStopPattern)[1];
-    deleteChatEvent(ctx.message.chat.id, idToStop).then((data) => {
-      if (data && !data.deletedCount) {
-        throw '(';
-      }
-
-      ctx.telegram.sendMessage(ctx.message.chat.id, 'Успех 👍')
-    }).catch((err) => {
-      ctx.telegram.sendMessage(ctx.message.chat.id, 'Не получилось 🥲');
-    });
-  } catch (err) {
-    ctx.telegram.sendMessage(ctx.message.chat.id, COMMON_EXEPTION_MESSAGE);
-  }
-});
-
-bot.command('addRecurrent', (ctx) => {
-  const chatId = ctx.message.chat.id
-
-  // "/addRecurrent 22:00 y late night hack
-  const message = ctx.message.text
-
-  const {
-    name,
-    eventTime,
-    atWeekend,
-  } = parseAddRecurrentMessage(message)
-
-  createEvent(
-    chatId,
-    name,
-    eventTime,
-    true,
-    atWeekend,
-  )
-
-  ctx.reply(`Создано событие ${name} на ${eventTime} ${atWeekend ? 'с выходными' : 'без выходных'}`)
-})
-
-bot.command('subscribe', (ctx) => {
-  const chatId = ctx.message.chat.id
-  const userId = ctx.message.from.id
-
-  addChatForUser(userId, chatId)
+Object.keys(commands).forEach((command) => {
+  bot.command(`/${command}`, (ctx) => {
+    commands[command].callback.apply(undefined, [ctx, commands[command]])
+  })
 })
 
 bot.launch()
 console.log("Стартанули успешно!")
 
-//require('./job')(cronTemplate, pushPoll)
+let queue = []
+createCronJob(cronForQueuing, async () => {
+  queue = await getAllEvents()
+})
+
+createCronJob(cronForEvents, () => {
+  queue = queue.filter((item) => {
+    const { eventTime } = item
+    const now = new Date()
+
+    // think about corner cases (where we get cut off by GMT+3)
+    const hoursEvent = eventTime.getHours()
+    const minutesEvent = eventTime.getMinutes()
+    const hoursNow = now.getHours()
+    const minutesNow = now.getMinutes()
+    if (!(hoursEvent <= hoursNow && minutesEvent <= minutesNow)) {
+      return true
+    }
+    pushPoll(chatId, eventTime)
+    return false
+  })
+})
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'))
