@@ -9,39 +9,23 @@ const {
 } = require('./db')
 const {
   parseAddRecurrentMessage,
+  pushPoll,
 } = require('./utils')
+const {
+  formQueue,
+  queue,
+} = require('./queue')
+const createCronJob = require('./job')
 require('dotenv').config()
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
-const chatId = process.env.CHAT_ID
-const cronTemplate = process.env.CRON
+const cronForEvents = process.env.CRON_EVENTS
+const cronForQueuing = process.env.CRON_QUEUING
 
 
 bot.command('quit', (ctx) => {
   ctx.leaveChat()
 })
-
-const options = [
-  '12:00', 
-  '12:30', 
-  '13:00', 
-  '13:30', 
-  '14:00', 
-  '14:30', 
-  '15:00',
-  'Хочу посмотреть результат'
-]
-
-const pushPoll = () => {
-  try {
-    bot.telegram.sendPoll(chatId, 'Друзья, во сколько сегодня пойдем кушать?', options, {
-      is_anonymous: false
-    })
-    console.log('Опрос отправил успешно')
-  } catch (err) {
-    console.error(err)
-  }
-}
 
 bot.command('id', (ctx) => {
   ctx.telegram.sendMessage(ctx.message.chat.id, `Your id: ${ctx.message.chat.id}`)
@@ -80,7 +64,16 @@ bot.command('subscribe', (ctx) => {
 bot.launch()
 console.log("Стартанули успешно!")
 
-//require('./job')(cronTemplate, pushPoll)
+const queue = []
+createCronJob(cronForQueuing, async () => {
+  queue = await getAllEvents()
+})
+
+createCronJob(cronForEvents, () => {
+  queue = queue.filter((item) => {
+    pushPoll(chatId)
+  })
+})
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'))
