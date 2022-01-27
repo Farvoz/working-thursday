@@ -70,7 +70,7 @@ bot.command('addRecurrent', (ctx) => {
   ctx.reply(`Создано событие ${name} на ${eventTime} ${atWeekend ? 'с выходными' : 'без выходных'}`)
 })
 
-bot.command('enableExtraForMe', (ctx) => {
+bot.command('subscribe', (ctx) => {
   const chatId = ctx.message.chat.id
   const userId = ctx.message.from.id
 
