@@ -1,5 +1,6 @@
 const monk = require('monk');
 require('dotenv').config()
+const MAX_INT = 3e6;
 
 const password = process.env.MONGO_PASS;
 
@@ -7,10 +8,44 @@ const uri = `mongodb+srv://bot_user:${password}@cluster0.3rhwd.mongodb.net/Bot?r
 
 const db = monk(uri);
 
-async function createRecurrentEvent(name, time, chatId) {
-  const EventCollection = db.collection('events');
-  const events = await EventCollection.find({})
-  console.log(events)
+const EventCollection = db.collection('events');
+
+async function getAllEvents() {
+  return EventCollection.find({});
 }
 
-createRecurrentEvent()
+async function createEvent(chatId, name, eventTime, recurrent, atWeekend) {
+  const randomId = Math.random() * MAX_INT;
+
+  const newEvent = {
+    chatId,
+    name,
+    eventTime,
+    recurrent,
+    id: randomId,
+  };
+
+  await EventCollection.insert(newEvent);
+}
+
+async function getEventsForChat(chatId) {
+  const events = await EventCollection.find({ chatId });
+  return events;
+}
+
+async function deleteEventsForChat(chatId, id) {
+  if (id) {
+    return await EventCollection.remove({ chatId, id })
+  }
+  return await EventCollection.remove({ chatId })
+}
+
+
+console.log(getAllEvents())
+
+module.exports = {
+  createEvent,
+  getEventsForChat,
+  deleteEventsForChat,
+  getAllEvents,
+}
