@@ -1,16 +1,8 @@
 const { Telegraf } =  require('telegraf')
-const {
-  createEvent,
-  getEventsForChat,
-  deleteEventsForChat,
-  getAllEvents,
-  getChatsForUser,
-  addChatForUser,
-} = require('./db')
-const {
-  parseAddRecurrentMessage,
-} = require('./utils')
+
 require('dotenv').config()
+
+const commands = require('./commands')
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
 const chatId = process.env.CHAT_ID
@@ -43,38 +35,10 @@ const pushPoll = () => {
   }
 }
 
-bot.command('id', (ctx) => {
-  ctx.telegram.sendMessage(ctx.message.chat.id, `Your id: ${ctx.message.chat.id}`)
-})
-
-bot.command('addRecurrent', (ctx) => {
-  const chatId = ctx.message.chat.id
-
-  // "/addRecurrent 22:00 y late night hack
-  const message = ctx.message.text
-
-  const {
-    name,
-    eventTime,
-    atWeekend,
-  } = parseAddRecurrentMessage(message)
-
-  createEvent(
-    chatId,
-    name,
-    eventTime,
-    true,
-    atWeekend,
-  )
-
-  ctx.reply(`Создано событие ${name} на ${eventTime} ${atWeekend ? 'с выходными' : 'без выходных'}`)
-})
-
-bot.command('enableExtraForMe', (ctx) => {
-  const chatId = ctx.message.chat.id
-  const userId = ctx.message.from.id
-
-  addChatForUser(userId, chatId)
+Object.keys(commands).forEach((command) => {
+  bot.command(`/${command}`, (ctx) => {
+    commands[command].callback.apply(undefined, [ctx, commands[command]])
+  })
 })
 
 bot.launch()
