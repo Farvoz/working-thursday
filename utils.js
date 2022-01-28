@@ -72,9 +72,46 @@ function formatDate(rawDate) {
   }
 }
 
+// Кейсы
+
+// Что-то как-то вы неактивно 🤷‍♀️
+// Больше всего людей идёт в 13:30
+// Больше всего людей идёт в 13:30, 14:00
+// Больше всего людей идёт в 13:30. Но можно сходить в 15: 30, 16:00
+// Больше всего людей идёт в 13:30, 14:00. Но можно сходить в 15: 30, 16:00
+function formatPollAnswer(ctx) {
+  const sortedOptions = ctx.poll.options
+    .filter(({voter_count}) => voter_count >= Number(process.env.MIN_VOICES))
+    .sort((a, b) => {
+      if (a.voter_count > b.voter_count) {
+        return -1;
+      }
+
+      if (a.voter_count < b.voter_count) {
+        return 1;
+      }
+
+      return 0;
+    });
+
+  if (sortedOptions.length === 0) {
+    return 'Что-то как-то вы неактивно 🤷‍♀️';
+  }
+
+  const firstOption = sortedOptions[0];
+  const withMaxResult = sortedOptions.filter(({voter_count}) => voter_count === firstOption.voter_count);
+  const restResult = sortedOptions.filter(({voter_count}) => voter_count < firstOption.voter_count)
+
+  const resultText = `Больше всего людей идёт в ${withMaxResult.map(({text}) => text).join(', ')}`;
+  const restText = restResult.length ? `. Но можно сходить в ${restResult.map(({text}) => text).join(', ')}` : '';
+
+  return resultText + restText;
+}
+
 
 module.exports = {
   parseAddRecurrentMessage,
   pushPoll,
   formatDate,
+  formatPollAnswer,
 }
