@@ -34,9 +34,9 @@ console.log("Стартанули успешно!")
 
 let queue = []
 // Для отладки сразу вкидывает в очередь
-getAllRecurrentEvents().then((res) => {
-  queue = res
-})
+// getAllRecurrentEvents().then((res) => {
+//   queue = res
+// })
 
 createCronJob(cronForQueuing, async () => {
   queue = (await getAllRecurrentEvents() || []).filter(({eventTime}) => ![6,7].includes(eventTime).getDay())
@@ -49,6 +49,7 @@ createCronJob(cronForEvents, () => {
   queue = queue.filter((item) => {
     const { eventTime, name } = item
     const now = new Date()
+    console.log(now.getTime(), beforeTheEvent)
     const startOfPoll = new Date(now.getTime() + Number(beforeTheEvent))
     console.log(startOfPoll)
     console.log(eventTime)

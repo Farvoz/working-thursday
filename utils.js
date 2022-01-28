@@ -61,12 +61,12 @@ function generateOptionsByTime (time) {
 
 const pushPoll = (chatId, name, eventTime) => {
   try {
-    eventTime
+    console.log('eventTime', eventTime)
     bot.telegram.sendPoll(chatId, `Друзья, во сколько сегодня ${name}`, generateOptionsByTime(eventTime), {
       is_anonymous: false
     }).then((data) => {
       setTimeout(() => {
-        bot.telegram.sendPoll(chatId, formatPollAnswer(data));
+        bot.telegram.sendMessage(chatId, formatPollAnswer(data));
       }, process.env.BEFORE_THE_EVENT)
     });
     console.log('Опрос отправил успешно')
