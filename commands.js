@@ -1,5 +1,6 @@
 const {
     parseAddRecurrentMessage,
+    parseAddOneMessage,
     formatPollAnswer,
     formatDate,
   } = require('./utils')
@@ -73,7 +74,28 @@ module.exports = {
     },
     'addOne': {
         'description': 'addOne',
-        callback: async () => ({})
+        callback: async (ctx) => {
+            const chatId = ctx.message.chat.id
+
+            // /addOne 22:00 late night hack
+            const message = ctx.message.text
+          
+            const {
+              name,
+              eventTime,
+            } = parseAddOneMessage(message)
+
+            const time = new Date(eventTime + ' 1 1 1970 GMT+3')
+          
+            await createEvent(
+              chatId,
+              name,
+              time,
+              false,
+            )
+          
+            ctx.reply(`Создано событие ${name} на ${eventTime}`)
+        }
     },
     'stopList': {
         'description': 'stopList',
