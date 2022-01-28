@@ -34,7 +34,7 @@ module.exports = {
             /showEvents - Получить список событий
             /stop <eventId> - Остановить событие по id
             /stopAll - Остановить все события
-            /subscribe - 
+            /subscribe - Подписаться на событие
             /showAvailable - Запрос событий, доступных пользователю
         `,
         callback: async (ctx, command) => {
