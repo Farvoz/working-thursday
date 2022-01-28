@@ -64,7 +64,11 @@ const pushPoll = (chatId, name, eventTime) => {
     eventTime
     bot.telegram.sendPoll(chatId, `Друзья, во сколько сегодня ${name}`, generateOptionsByTime(eventTime), {
       is_anonymous: false
-    })
+    }).then((data) => {
+      setTimeout(() => {
+        bot.telegram.sendPoll(chatId, formatPollAnswer(data));
+      }, process.env.BEFORE_THE_EVENT)
+    });
     console.log('Опрос отправил успешно')
   } catch (err) {
     console.error(err)
