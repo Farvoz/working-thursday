@@ -39,6 +39,7 @@ createCronJob(cronForQueuing, async () => {
   dropSelectedTimeCollection()
 })
 
+/*
 createCronJob(cronForEvents, () => {
   console.log(queue)
   queue = queue.filter((item) => {
@@ -57,6 +58,7 @@ createCronJob(cronForEvents, () => {
     return false
   })
 })
+*/
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'))

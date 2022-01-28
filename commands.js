@@ -173,17 +173,17 @@ module.exports = {
         'description': 'showAvailable',
         callback: async (ctx) => {
             const userId = ctx.message.from.id
-            const chats = await getChatsForUser(userId) || [];
+            const chats = await getChatsForUser(userId);
             const events = await getEventsForAllChats(chats)
             if (events.length === 0) {
                 return ctx.reply(`У вас нет доступных событий`)
             }
             ctx.reply(`Список доступных событий:
-                ${events.reduce('', (acc, el) => {
-                    acc += (el.name + ': ' + el.time + '\n')
-                    return acc 
-                })}
-            `)
+${events.reduce((acc, el) => {
+    acc += (el.name + ': ' + formatDate(el.eventTime) + '\n')
+    return acc 
+}, '')}`
+            )
         }
     }
 }

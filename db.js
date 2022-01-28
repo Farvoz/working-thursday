@@ -17,7 +17,7 @@ async function dropSelectedTimeCollection() {
 }
 
 async function getChatsForUser(userId) {
-  const user = await UserCollection.find({ userId });
+  const user = await UserCollection.findOne({ userId });
   if (!user) return null;
   return user.chatIds;
 }
@@ -59,7 +59,7 @@ async function getEventsForChat(chatId) {
 }
 
 async function getEventsForAllChats(chatIds) {
-  const events = await EventCollection.find({ chatId: {$all: chatIds} });
+  const events = await EventCollection.find({ chatId: {$in: chatIds} });
   return events;
 }
 
