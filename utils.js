@@ -25,8 +25,8 @@ function parseAddRecurrentMessage(str) {
 }
 
 function generateOptionsByTime (time) {
-  let hourStart = time.getHours() + 3
-  let minutesStart = Math.round(time.getMinutes() / 30) * 30
+  let hourStart = time.getUTCHours() + 3
+  let minutesStart = Math.round(time.getUTCMinutes() / 30) * 30
   if (minutesStart === 60) {
     minutesStart = 0
     hourStart += 1
