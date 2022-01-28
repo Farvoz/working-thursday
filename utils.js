@@ -24,6 +24,27 @@ function parseAddRecurrentMessage(str) {
   }
 }
 
+function parseAddOneMessage(str) {
+  const TEMPLATE = '/addOne'
+  const startingIndex = str.indexOf(TEMPLATE)
+  const withoutCommand = str.substring(startingIndex + TEMPLATE.length)
+  const time = withoutCommand.match(/\d\d:\d\d/)
+
+  if (!time) {
+    return {error: true}
+  }
+
+  const eventTime = time[0]
+
+  const timeIndex = withoutCommand.indexOf(eventTime)
+  const name = withoutCommand.substring(timeIndex + eventTime.length).trim()
+
+  return {
+    name,
+    eventTime,
+  }
+}
+
 function generateOptionsByTime (time) {
   return ['14:00', '14:30'] // Сюда добавить интервалы по полчаса на 4 часа
 }
@@ -93,6 +114,7 @@ function formatPollAnswer(ctx) {
 
 module.exports = {
   parseAddRecurrentMessage,
+  parseAddOneMessage,
   pushPoll,
   formatDate,
   formatPollAnswer,
