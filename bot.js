@@ -15,6 +15,7 @@ const {
 const bot = new Telegraf(process.env.BOT_TOKEN)
 const cronForEvents = process.env.CRON_EVENTS
 const cronForQueuing = process.env.CRON_QUEUING
+const beforeTheEvent = process.env.BEFORE_THE_EVENT
 
 bot.command('quit', (ctx) => {
   ctx.leaveChat()
@@ -47,13 +48,14 @@ createCronJob(cronForEvents, () => {
   queue = queue.filter((item) => {
     const { eventTime, name } = item
     const now = new Date()
+    const startOfPoll = new Date().setTime(now.getTime() + beforeTheEvent)
     console.log(eventTime)
     // think about corner cases (where we get cut off by GMT+3)
     const hoursEvent = eventTime.getHours()
     const minutesEvent = eventTime.getMinutes()
-    const hoursNow = now.getHours()
-    const minutesNow = now.getMinutes()
-    if (!(hoursEvent <= hoursNow && minutesEvent <= minutesNow)) {
+    const hoursStart = startOfPoll.getHours()
+    const minutesStart = startOfPoll.getMinutes()
+    if (!(hoursEvent <= hoursStart && minutesEvent <= minutesStart)) {
       return true
     }
     pushPoll(item.chatId, name, eventTime)
