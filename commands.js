@@ -29,13 +29,13 @@ module.exports = {
         'description': `
             Привет! Я бот любящий поесть и выпить. Я буду тебе очень полезен.
             /help - Справка
-            /addRecurrent <time> <eventName> - Создать повторяющееся событие в формате
+            /addRecurrent <time> <eventName> - Создать повторяющееся событие в формате (пример: /addRecurrent 12:00 обед)
             /addOne <time> <eventName> - Создать одиночное событие в формате
-            /showEvents - Получить список событий
+            /showEvents - Получить список событий в текущем чате
             /stop <eventId> - Остановить событие по id
             /stopAll - Остановить все события
-            /subscribe - 
-            /showAvailable - Запрос событий, доступных пользователю
+            /subscribe - Подписатся на события в чате
+            /showAvailable - Запрос событий, доступных пользователю из всех чатов, где он состоит
         `,
         callback: async (ctx, command) => {
             ctx.telegram.sendMessage(ctx.message.chat.id, command.description)
@@ -46,7 +46,6 @@ module.exports = {
         callback: async (ctx) => {
             const chatId = ctx.message.chat.id
 
-            // /addRecurrent 22:00 late night hack
             const message = ctx.message.text
           
             const {
@@ -168,7 +167,7 @@ module.exports = {
         callback: async (ctx) => {
             const userId = ctx.message.from.id
             const chats = await getChatsForUser(userId);
-            const events = await getEventsForAllChats(chats)
+            const events = await getEventsForAllChats(chats || [])
             if (events.length === 0) {
                 return ctx.reply(`У вас нет доступных событий`)
             }
