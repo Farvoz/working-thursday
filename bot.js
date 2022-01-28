@@ -20,6 +20,8 @@ bot.command('quit', (ctx) => {
   ctx.leaveChat()
 })
 
+bot.help((ctx) => ctx.reply(commands['start'].description));
+
 Object.keys(commands).forEach((command) => {
   bot.command(`/${command}`, (ctx) => {
     commands[command].callback.apply(undefined, [ctx, commands[command]])
