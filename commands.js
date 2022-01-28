@@ -28,7 +28,6 @@ module.exports = {
     'start': {
         'description': `
             Привет! Я бот любящий поесть и выпить. Я буду тебе очень полезен.
-            /help - Справка
             /addRecurrent <time> <eventName> - Создать повторяющееся событие в формате (пример: /addRecurrent 12:00 обед)
             /addOne <time> <eventName> - Создать одиночное событие в формате
             /showEvents - Получить список событий в текущем чате
