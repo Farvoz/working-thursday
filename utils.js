@@ -25,14 +25,22 @@ function parseAddRecurrentMessage(str) {
 }
 
 function generateOptionsByTime (time) {
-  return ['14:00', '14:30'] // Сюда добавить интервалы по полчаса на 4 часа
+  const offset = 1000 * 60 * 30;
+  const dates = []
+  for (let i = 0; i < 8; i++) {
+      const newDate = new Date(time.getTime() + offset * i)
+
+      const hours = newDate.getHours()
+      const minutes = newDate.getMinutes()
+      dates.push(`${hours < 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes}` : minutes}`)
+  }
+  return dates
 }
 
 // Как-то получать время в опросе
 
 const pushPoll = (chatId, eventTime) => {
   try {
-    eventTime
     bot.telegram.sendPoll(chatId, 'Друзья, во сколько сегодня пойдем кушать?', generateOptionsByTime(eventTime), {
       is_anonymous: false
     })
