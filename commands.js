@@ -29,11 +29,11 @@ module.exports = {
         'description': `
             Привет! Я бот любящий поесть и выпить. Я буду тебе очень полезен.
             /help - Справка
-            /addRecurrent<event> - Создать событие в формате
-            /addOne<time> - Создать событие в формате
-            /stop - 
-            /stop<id> - 
-            /stopAll -
+            /addRecurrent <time> <eventName> - Создать повторяющееся событие в формате
+            /addOne <time> <eventName> - Создать одиночное событие в формате
+            /showEvents - Получить список событий
+            /stop <eventId> - Остановить событие по id
+            /stopAll - Остановить все события
             /subscribe - 
             /showAvailable - Запрос событий, доступных пользователю
         `,
