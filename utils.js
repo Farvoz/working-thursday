@@ -37,14 +37,14 @@ function generateOptionsByTime (time) {
   return dates
 }
 
-// Как-то получать время в опросе
 
-const pushPoll = (chatId, eventTime) => {
+const pushPoll = (chatId, name, eventTime) => {
   try {
-    bot.telegram.sendPoll(chatId, 'Друзья, во сколько сегодня пойдем кушать?', generateOptionsByTime(eventTime), {
+    eventTime
+    bot.telegram.sendPoll(chatId, `Друзья, во сколько сегодня ${name}`, generateOptionsByTime(eventTime), {
       is_anonymous: false
     })
-    console.log('ОпросF отправил успешно')
+    console.log('Опрос отправил успешно')
   } catch (err) {
     console.error(err)
   }

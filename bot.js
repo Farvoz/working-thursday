@@ -42,7 +42,7 @@ createCronJob(cronForQueuing, async () => {
 createCronJob(cronForEvents, () => {
   console.log(queue)
   queue = queue.filter((item) => {
-    const { eventTime } = item
+    const { eventTime, name } = item
     const now = new Date()
     console.log(eventTime)
     // think about corner cases (where we get cut off by GMT+3)
@@ -53,7 +53,7 @@ createCronJob(cronForEvents, () => {
     if (!(hoursEvent <= hoursNow && minutesEvent <= minutesNow)) {
       return true
     }
-    pushPoll(item.chatId, eventTime)
+    pushPoll(item.chatId, name, eventTime)
     return false
   })
 })
