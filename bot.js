@@ -32,16 +32,16 @@ bot.launch()
 console.log("Стартанули успешно!")
 
 let queue = []
-getAllRecurrentEvents().then((res) => {
-  queue = res
-})
+// Для отладки сразу вкидывает в очередь
+// getAllRecurrentEvents().then((res) => {
+//   queue = res
+// })
 
 createCronJob(cronForQueuing, async () => {
   queue = (await getAllRecurrentEvents() || []).filter(({eventTime}) => ![6,7].includes(eventTime).getDay())
   dropSelectedTimeCollection()
 })
 
-/*
 createCronJob(cronForEvents, () => {
   console.log(queue)
   queue = queue.filter((item) => {
@@ -60,7 +60,6 @@ createCronJob(cronForEvents, () => {
     return false
   })
 })
-*/
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'))

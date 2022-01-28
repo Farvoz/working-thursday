@@ -173,11 +173,11 @@ module.exports = {
                 return ctx.reply(`У вас нет доступных событий`)
             }
             ctx.reply(`Список доступных событий:
-${events.reduce((acc, el) => {
-    acc += (el.name + ': ' + formatDate(el.eventTime) + '\n')
-    return acc 
-}, '')}`
-            )
+                ${events.reduce((acc, el) => {
+                    acc += (el.name + ': ' + formatDate(el.eventTime) + '\n')
+                    return acc 
+                }, '')}
+            `)
         }
     }
 }
