@@ -41,12 +41,6 @@ module.exports = {
             ctx.telegram.sendMessage(ctx.message.chat.id, command.description)
         }
     },
-    'help': {
-        'description': 'Помощь',
-        callback: async () => (ctx, command) => {
-            ctx.telegram.sendMessage(ctx.message.chat.id, command.description)
-        }
-    },
     'addRecurrent': {
         'description': 'addRecurrent',
         callback: async (ctx) => {
