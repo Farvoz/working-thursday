@@ -34,12 +34,13 @@ console.log("Стартанули успешно!")
 
 let queue = []
 // Для отладки сразу вкидывает в очередь
-// getAllRecurrentEvents().then((res) => {
-//   queue = res
-// })
+getAllRecurrentEvents().then((res) => {
+  queue = res
+})
 
 createCronJob(cronForQueuing, async () => {
   queue = (await getAllRecurrentEvents() || []).filter(({eventTime}) => ![6,7].includes(eventTime).getDay())
+  console.log(await getAllRecurrentEvents())
   dropSelectedTimeCollection()
 })
 
@@ -48,14 +49,16 @@ createCronJob(cronForEvents, () => {
   queue = queue.filter((item) => {
     const { eventTime, name } = item
     const now = new Date()
-    const startOfPoll = new Date().setTime(now.getTime() + beforeTheEvent)
+    const startOfPoll = new Date(now.getTime() + Number(beforeTheEvent))
+    console.log(startOfPoll)
     console.log(eventTime)
     // think about corner cases (where we get cut off by GMT+3)
     const hoursEvent = eventTime.getHours()
     const minutesEvent = eventTime.getMinutes()
     const hoursStart = startOfPoll.getHours()
     const minutesStart = startOfPoll.getMinutes()
-    if (!(hoursEvent <= hoursStart && minutesEvent <= minutesStart)) {
+    console.log('%d:%d %d:%d', hoursEvent, minutesEvent, hoursStart, minutesStart)
+    if (!(hoursEvent <= hoursStart || (hoursEvent === hoursStart && minutesEvent <= minutesStart))) {
       return true
     }
     pushPoll(item.chatId, name, eventTime)
